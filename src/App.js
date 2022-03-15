@@ -8,7 +8,7 @@ function Line({ start, end }) {
 	const ref = useRef();
 	useLayoutEffect(() => {
 		ref.current.geometry.setFromPoints(
-			[start, end].map((point) => new THREE.Vector3(...point)),
+			createOrbitPoints(start, end, 1000),
 		);
 	}, [start, end]);
 	return (
@@ -19,9 +19,29 @@ function Line({ start, end }) {
 	);
 }
 
+function createOrbitPoints(start, end, segment) {
+	const vertices = [];
+	const startVec = new THREE.Vector3(...start);
+	const endVec = new THREE.Vector3(...end);
+
+	const axis = startVec.clone().cross(endVec);
+	axis.normalize();
+	const angle = startVec.angleTo(endVec);
+	for (let i = 0; i < segment; i++) {
+		const q = new THREE.Quaternion();
+		q.setFromAxisAngle(axis, (angle / segment) * i);
+
+		const vertex = startVec.clone().applyQuaternion(q);
+		vertices.push(vertex);
+	}
+	vertices.push(endVec);
+	return vertices;
+}
+
+
 function App() {
 	const { links } = graph;
-	const radius = 3;
+	const radius = 2.5;
 	const points = convertPolar2Cartesian(radius);
 	return (
 		<div style={{ width: window.innerWidth, height: window.innerHeight }}>
