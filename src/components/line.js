@@ -4,7 +4,8 @@ import * as THREE from "three";
 function Line({ start, end }) {
 	const ref = useRef();
 	useLayoutEffect(() => {
-		ref.current.geometry.setFromPoints(createOrbitPoints(start, end, 1000));
+		ref.current.geometry.setFromPoints(createOrbitPoints(start, end, 100));
+		console.log(ref.current);
 	}, [start, end]);
 	return (
 		<line ref={ref}>
@@ -31,6 +32,6 @@ const createOrbitPoints = (start, end, segment) => {
 
 	vertices.push(endVec);
 	return vertices;
-}
+};
 
 export default Line;

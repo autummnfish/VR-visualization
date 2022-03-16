@@ -1,7 +1,8 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import graph from "./graph.json";
-import Line from "./components/line"
+import Line from "./components/line";
+// import "./style.css";
 
 function App() {
 	const { links } = graph;
@@ -25,7 +26,7 @@ function App() {
 						</mesh>
 					);
 				})}
-				{links.map((link) => {
+				{links.map((link, index) => {
 					const source = [
 						points[link.source].x,
 						points[link.source].y,
@@ -36,11 +37,19 @@ function App() {
 						points[link.target].y,
 						points[link.target].z,
 					];
-					return <Line start={source} end={target} />;
+					return <Line start={source} end={target} index={index} />;
 				})}
 			</Canvas>
 		</div>
 	);
+}
+
+function Arrow(start,length,hex) {
+	const dir = new THREE.Vector3(...start);
+	dir.normalize();
+	const origin = new THREE.Vector3(...start);
+	const arrowHelper = new THREE.ArrowHelper(dir,origin,length,hex);
+	return arrowHelper;
 }
 
 const convertPolar2Cartesian = (radius) => {
@@ -49,12 +58,11 @@ const convertPolar2Cartesian = (radius) => {
 	nodes.forEach((node) => {
 		cartesian.push({
 			x: radius * Math.sin(node.y) * Math.cos(node.x),
-			y: radius * Math.sin(node.x) * Math.cos(node.y),
+			y: radius * Math.sin(node.y) * Math.sin(node.x),
 			z: radius * Math.cos(node.y),
 		});
 	});
 	return cartesian;
 };
-
 
 export default App;
