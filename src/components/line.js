@@ -10,7 +10,7 @@ function Line({ start, end }) {
 	return (
 		<line ref={ref}>
 			<bufferGeometry />
-			<lineBasicMaterial color="hotpink" />
+			<lineBasicMaterial color="blue" />
 		</line>
 	);
 }
