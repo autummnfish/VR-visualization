@@ -1,11 +1,14 @@
 import { useRef, useLayoutEffect } from "react";
 import * as THREE from "three";
 
-function Line({ start, end }) {
+function Line({ source, target, segment }) {
 	const ref = useRef();
+	const start = [source.x, source.y, source.z];
+	const end = [target.x, target.y, target.z];
 	useLayoutEffect(() => {
-		ref.current.geometry.setFromPoints(createOrbitPoints(start, end, 100));
-		console.log(ref.current);
+		ref.current.geometry.setFromPoints(
+			createOrbitPoints(start, end, segment),
+		);
 	}, [start, end]);
 	return (
 		<line ref={ref}>
@@ -22,14 +25,12 @@ const createOrbitPoints = (start, end, segment) => {
 	const axis = startVec.clone().cross(endVec);
 	axis.normalize();
 	const angle = startVec.angleTo(endVec);
-
 	for (let i = 0; i < segment; i++) {
-		const q = new THREE.Quaternion();
-		q.setFromAxisAngle(axis, (angle / segment) * i);
-		const vertex = startVec.clone().applyQuaternion(q);
+		const quaternion = new THREE.Quaternion();
+		quaternion.setFromAxisAngle(axis, (angle / segment) * i);
+		const vertex = startVec.clone().applyQuaternion(quaternion);
 		vertices.push(vertex);
 	}
-
 	vertices.push(endVec);
 	return vertices;
 };
