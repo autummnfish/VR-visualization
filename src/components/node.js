@@ -15,7 +15,7 @@ function Node({ point }) {
 			}}
 		>
 			<mesh position={[point.x, point.y, point.z]}>
-				<sphereGeometry args={squeeze ? [1] : [0.5]} />
+				<sphereGeometry args={squeeze ? [0.5] : [0.3]} />
 				<meshStandardMaterial
 					color={select ? (squeeze ? "red" : "blue") : "white"}
 				/>
