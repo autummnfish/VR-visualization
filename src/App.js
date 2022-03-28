@@ -1,92 +1,58 @@
-import { useRef, useLayoutEffect } from "react";
-import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
 import graph from "./graph.json";
-
-function Line({ start, end }) {
-	const ref = useRef();
-	useLayoutEffect(() => {
-		ref.current.geometry.setFromPoints(createOrbitPoints(start, end, 1000));
-	}, [start, end]);
-	return (
-		<line ref={ref}>
-			<bufferGeometry />
-			<lineBasicMaterial color="hotpink" />
-		</line>
-	);
-}
-
-function createOrbitPoints(start, end, segment) {
-	const vertices = [];
-	const startVec = new THREE.Vector3(...start);
-	const endVec = new THREE.Vector3(...end);
-	const axis = startVec.clone().cross(endVec);
-	axis.normalize();
-	const angle = startVec.angleTo(endVec);
-
-	for (let i = 0; i < segment; i++) {
-		const q = new THREE.Quaternion();
-		q.setFromAxisAngle(axis, (angle / segment) * i);
-		const vertex = startVec.clone().applyQuaternion(q);
-		vertices.push(vertex);
-	}
-
-	vertices.push(endVec);
-	return vertices;
-}
+import Line from "./components/line";
+import Node from "./components/node";
+import { VRCanvas, DefaultXRControllers } from "@react-three/xr";
+import "./style.css";
 
 function App() {
-	const { links } = graph;
-	const radius = 2.5;
-	const points = convertPolar2Cartesian(radius);
+	const { links, nodes } = graph;
+	const radius = 10;
+	const points = getCartesianPoints(radius, nodes);
 	return (
 		<div style={{ width: window.innerWidth, height: window.innerHeight }}>
-			<Canvas>
-				<ambientLight color="red" intensity={0.1} />
-				<directionalLight color="red" position={[0, 0, 5]} />
+			<VRCanvas alpha={true}>
+				<pointLight color="white" position={[0, 0, 0]} intensity={1} />
 				<OrbitControls
-					enablePan={true}
-					enableZoom={true}
+					enablePan={false}
+					enableZoom={false}
 					enableRotate={true}
 				/>
-				{points.map((point) => {
+				<DefaultXRControllers />
+				{points.map((point, index) => {
+					return <Node point={point} key={`node is ${index + 1}`} />;
+				})}
+				{links.map((link, index) => {
+					const source = points[link.source];
+					const target = points[link.target];
 					return (
-						<mesh position={[point.x, point.y, point.z]}>
-							<sphereGeometry args={[0.04]} />
-							<meshStandardMaterial />
-						</mesh>
+						<Line
+							source={source}
+							target={target}
+							segment={2}
+							key={`link is ${index + 1}`}
+						/>
 					);
 				})}
-				{links.map((link) => {
-					const source = [
-						points[link.source].x,
-						points[link.source].y,
-						points[link.source].z,
-					];
-					const target = [
-						points[link.target].x,
-						points[link.target].y,
-						points[link.target].z,
-					];
-					return <Line start={source} end={target} />;
-				})}
-			</Canvas>
+			</VRCanvas>
 		</div>
 	);
 }
 
-const convertPolar2Cartesian = (radius) => {
-	const { nodes } = graph;
+const getCartesianPoints = (radius, nodes) => {
 	const cartesian = [];
 	nodes.forEach((node) => {
-		cartesian.push({
-			x: radius * Math.sin(node.y) * Math.cos(node.x),
-			y: radius * Math.sin(node.x) * Math.cos(node.y),
-			z: radius * Math.cos(node.y),
-		});
+		cartesian.push(convertPolar2Cartesian(radius, node));
 	});
 	return cartesian;
+};
+
+const convertPolar2Cartesian = (radius, node) => {
+	return {
+		x: radius * Math.sin(node.y) * Math.cos(node.x),
+		y: radius * Math.sin(node.y) * Math.sin(node.x),
+		z: radius * Math.cos(node.y),
+	};
 };
 
 export default App;
