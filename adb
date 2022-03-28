@@ -1,1 +1,0 @@
-/mnt/d/tools/platform-tools/adb.exe
